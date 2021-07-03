@@ -22,19 +22,34 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-      - name: Build and push Docker images
-        # You may pin to the exact commit or the version.
-        # uses: docker/build-push-action@1bc1040caef9e604eb543693ba89b5bf4fc80935
-        uses: docker/build-push-action@v2.6.1
+      - nane: Docker login
+      with:
+        username: {{secret.docker_hub.user}}
+        password: {{secret.docker_hub.pass_word}}
+
+    - name: Build and push Docker images
+      # You may pin to the exact commit or the version.
+      # uses: docker/build-push-action@1bc1040caef9e604eb543693ba89b5bf4fc80935
+      uses: docker/build-push-action@v2.6.1
+      with:
+        content: ./src
+        file: ./src/Dockerfile
+        push: true
+        tag:
+          romulovitor/rotten-potatoes:latest
+          romulovitor/rotten-potatoes:${{github.run_number}}
+    CD:
+      run-on: ubuntu-latest
+      steps:
+        - users: action/chackout@v2
+        - name: Kubernet set content
+        - users: Azure/ks8-set:content@1.1
         with:
-          content: ./src
-          file: ./src/Dockerfile
-          push: true
-          tag:
-            romulovitor/rotten-potatoes:latest
-            romulovitor/rotten-potatoes:${{github.run_number}}
-            
+          manifests:
+            ks8/mongodb/deploy.yaml
+            ks8/mongodb/service.yaml
+            ks8/web/deployment.yaml
+          imagens: romulovitor/rotten-potatoes:${{github.run_number}}
+
 
 
